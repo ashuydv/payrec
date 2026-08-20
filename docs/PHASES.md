@@ -77,10 +77,24 @@ unchanged) to free up the natural name for this resource controller.
 
 See `docs/phase-5-settlement-resource-api.md`.
 
+## Phase 6 — Scheduled settlement runs ✅
+
+`SettlementScheduler` runs the settlement job automatically once a day
+(default 02:00 UTC, configurable via `payrecon.settlement.schedule.cron`),
+settling the *previous* UTC day so transactions have had a full day to
+reconcile first. The launch-and-extract-result logic that used to live in
+`SettlementRunController` moved into a shared `SettlementRunLauncher` so the
+HTTP trigger (Phase 4/5) and the new cron trigger use identical logic.
+Gated by `payrecon.settlement.schedule.enabled` (off in the test profile).
+
+See `docs/phase-6-scheduled-settlement-runs.md`.
+
 ## What's next (not yet planned in detail)
 
-The full transaction → reconciliation → settlement → finalize pipeline is
-now navigable end-to-end over REST. Natural follow-ups, none started yet:
-scheduling settlement runs instead of triggering them by hand, surfacing
-orphaned ledger entries (see `docs/phase-3-reconciliation-engine.md`'s "not
-in scope"), and a payout/export integration once a settlement is finalized.
+The full transaction → reconciliation → settlement → finalize pipeline now
+runs itself daily and is also fully navigable by hand over REST. Natural
+follow-ups, none started yet: surfacing orphaned ledger entries (see
+`docs/phase-3-reconciliation-engine.md`'s "not in scope"), a payout/export
+integration once a settlement is finalized, and a distributed lock for the
+scheduler if this ever runs as more than one instance (see
+`docs/phase-6-scheduled-settlement-runs.md`'s "not in scope").

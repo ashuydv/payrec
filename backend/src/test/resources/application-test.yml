@@ -15,3 +15,9 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: always
+
+payrecon:
+  settlement:
+    schedule:
+      # Never fire on a cron in tests; SettlementSchedulerTest drives it directly.
+      enabled: false

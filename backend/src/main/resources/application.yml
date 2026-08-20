@@ -24,6 +24,13 @@ spring:
     jdbc:
       initialize-schema: always
 
+payrecon:
+  settlement:
+    schedule:
+      # Settles the previous UTC day, once it's had a full day to reconcile.
+      enabled: true
+      cron: "0 0 2 * * *"
+
 server:
   port: 8080
 
