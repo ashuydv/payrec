@@ -50,11 +50,23 @@ verdict that downstream settlement can trust.
 
 See `docs/phase-3-reconciliation-engine.md`.
 
-## Phase 4 — Settlement batch job (planned)
+## Phase 4 — Settlement batch job ✅
 
-Aggregates reconciled transactions into per-merchant, per-period
-`Settlement` rows via Spring Batch (already a dependency; batch auto-run is
-disabled in `application.yml` pending this phase). `Settlement.version`
-already carries a `@Version` optimistic lock — noted in the entity as
-existing for this phase — to stop two concurrent settlement runs for the
-same merchant/period from double-counting transactions.
+Aggregates reconciled (Phase 3 MATCHED) transactions into per-merchant,
+per-period `Settlement` rows via an actual Spring Batch `Job`/`Step`,
+triggered on demand through `POST /api/settlement-runs?period=...`.
+`Settlement.version`'s `@Version` optimistic lock — noted in the entity as
+existing for this phase — now does its job: a concurrent settlement run for
+the same merchant/period is caught and skipped rather than double-counting.
+A new nullable `Transaction.settlement` FK marks which transactions have
+already been aggregated, which is what makes rerunning a period safe.
+
+See `docs/phase-4-settlement-batch.md`.
+
+## What's next (not yet planned in detail)
+
+The domain now supports the full transaction → reconciliation → settlement
+pipeline. Natural follow-ups, none started yet: exposing `Settlement` over
+REST (list/get, and a `FINALIZED` transition), scheduling settlement runs
+instead of triggering them by hand, and surfacing orphaned ledger entries
+(see `docs/phase-3-reconciliation-engine.md`'s "not in scope").

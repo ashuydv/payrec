@@ -61,6 +61,16 @@ public class Transaction {
     @Column(name = "next_retry_at")
     private Instant nextRetryAt;
 
+    /**
+     * The settlement this transaction was aggregated into, if any. Null means
+     * "not yet settled" — the settlement batch (Phase 4) uses that to find its
+     * candidate set and to avoid double-counting an already-settled
+     * transaction on a later run.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "settlement_id")
+    private Settlement settlement;
+
     protected Transaction() {
     }
 
@@ -126,5 +136,13 @@ public class Transaction {
 
     public void setNextRetryAt(Instant nextRetryAt) {
         this.nextRetryAt = nextRetryAt;
+    }
+
+    public Settlement getSettlement() {
+        return settlement;
+    }
+
+    public void setSettlement(Settlement settlement) {
+        this.settlement = settlement;
     }
 }

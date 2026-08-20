@@ -40,7 +40,7 @@ class ReconciliationServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReconciliationServiceImpl(transactionRepository, ledgerEntryRepository);
+        service = new ReconciliationServiceImpl(transactionRepository, ledgerEntryRepository, new ReconciliationClassifier());
         merchant = new Merchant("Acme Co", "ACC-001");
         setId(merchant, 1L);
         transaction = new Transaction(merchant, new BigDecimal("100.00"), "USD", "ext-123");
