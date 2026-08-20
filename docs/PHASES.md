@@ -37,14 +37,18 @@ Two prerequisites reconciliation can't run without:
 
 See `docs/phase-2-merchant-and-ledger-ingestion.md`.
 
-## Phase 3 — Reconciliation engine (planned)
+## Phase 3 — Reconciliation engine ✅
 
 Matches each transaction against its ledger entries (by `externalReference`)
-and classifies the result: matched (amounts agree across sources), amount
-mismatch, missing bank confirmation, or an orphaned ledger entry with no
-transaction. This is the core "reconciliation" in PayRecon — it turns two
-independent, unordered event streams into a per-transaction verdict that
-downstream settlement can trust.
+and classifies the result: `MATCHED` (amounts agree across an `INTERNAL` and
+a `BANK_FEED` entry), `AMOUNT_MISMATCH`, `MISSING_BANK_CONFIRMATION`, or
+`NO_LEDGER_ENTRIES`. Computed on demand via
+`GET /api/transactions/{id}/reconciliation` rather than persisted — see
+`ReconciliationServiceImpl`. This is the core "reconciliation" in PayRecon —
+it turns two independent, unordered event streams into a per-transaction
+verdict that downstream settlement can trust.
+
+See `docs/phase-3-reconciliation-engine.md`.
 
 ## Phase 4 — Settlement batch job (planned)
 
