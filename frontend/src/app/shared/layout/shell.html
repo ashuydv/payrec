@@ -1,0 +1,14 @@
+<mat-toolbar color="primary" class="shell-toolbar">
+  <mat-icon>account_balance</mat-icon>
+  <span class="shell-title">PayRecon</span>
+</mat-toolbar>
+
+<nav class="shell-nav">
+  <a routerLink="/transactions" routerLinkActive="active-link" class="nav-link">Transactions</a>
+  <a routerLink="/reconciliation" routerLinkActive="active-link" class="nav-link">Reconciliation</a>
+  <a routerLink="/settlements" routerLinkActive="active-link" class="nav-link">Settlements</a>
+</nav>
+
+<main class="shell-content">
+  <router-outlet />
+</main>

@@ -1,0 +1,31 @@
+.filter-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.filter-field {
+  width: 200px;
+}
+
+.state-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 0;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.error-row {
+  color: #b71c1c;
+}
+
+.settlements-table {
+  width: 100%;
+}
+
+.totals-line {
+  margin-top: 1rem;
+  font-weight: 600;
+}

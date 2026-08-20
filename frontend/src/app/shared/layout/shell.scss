@@ -1,0 +1,37 @@
+.shell-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.shell-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.shell-nav {
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fafafa;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link.active-link {
+  color: #1a237e;
+  border-bottom-color: #1a237e;
+}
+
+.shell-content {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
