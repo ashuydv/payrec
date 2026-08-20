@@ -1,5 +1,6 @@
 package com.payrecon.dto;
 
+import com.payrecon.domain.PaymentType;
 import com.payrecon.domain.Transaction;
 import com.payrecon.domain.TransactionStatus;
 
@@ -13,6 +14,7 @@ public record TransactionResponse(
         BigDecimal amount,
         String currency,
         TransactionStatus status,
+        PaymentType paymentType,
         String externalReference,
         Instant createdAt,
         Instant processedAt,
@@ -27,6 +29,7 @@ public record TransactionResponse(
                 t.getAmount(),
                 t.getCurrency(),
                 t.getStatus(),
+                t.getPaymentType(),
                 t.getExternalReference(),
                 t.getCreatedAt(),
                 t.getProcessedAt(),

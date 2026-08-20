@@ -41,6 +41,10 @@ public class Transaction {
     @Column(nullable = false, length = 20)
     private TransactionStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_type", nullable = false, length = 20)
+    private PaymentType paymentType;
+
     /**
      * Natural key supplied by the upstream feed/caller. The unique constraint on
      * this column is what makes transaction creation idempotent (see
@@ -65,10 +69,15 @@ public class Transaction {
     }
 
     public Transaction(Merchant merchant, BigDecimal amount, String currency, String externalReference) {
+        this(merchant, amount, currency, externalReference, PaymentType.CARD);
+    }
+
+    public Transaction(Merchant merchant, BigDecimal amount, String currency, String externalReference, PaymentType paymentType) {
         this.merchant = merchant;
         this.amount = amount;
         this.currency = currency;
         this.externalReference = externalReference;
+        this.paymentType = paymentType;
         this.status = TransactionStatus.PENDING;
         this.createdAt = Instant.now();
     }
@@ -91,6 +100,10 @@ public class Transaction {
 
     public TransactionStatus getStatus() {
         return status;
+    }
+
+    public PaymentType getPaymentType() {
+        return paymentType;
     }
 
     public void setStatus(TransactionStatus status) {

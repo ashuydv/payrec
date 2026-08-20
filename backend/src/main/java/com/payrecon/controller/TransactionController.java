@@ -6,6 +6,7 @@ import com.payrecon.dto.CreateTransactionResult;
 import com.payrecon.dto.PageResponse;
 import com.payrecon.dto.TransactionResponse;
 import com.payrecon.dto.UpdateTransactionStatusRequest;
+import com.payrecon.retry.RetryService;
 import com.payrecon.service.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
@@ -30,9 +31,11 @@ import java.time.Instant;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final RetryService retryService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService, RetryService retryService) {
         this.transactionService = transactionService;
+        this.retryService = retryService;
     }
 
     @PostMapping
@@ -65,5 +68,10 @@ public class TransactionController {
     public ResponseEntity<TransactionResponse> updateStatus(
             @PathVariable Long id, @Valid @RequestBody UpdateTransactionStatusRequest request) {
         return ResponseEntity.ok(transactionService.updateStatus(id, request.status()));
+    }
+
+    @PostMapping("/{id}/retry")
+    public ResponseEntity<TransactionResponse> retry(@PathVariable Long id) {
+        return ResponseEntity.ok(retryService.retry(id));
     }
 }

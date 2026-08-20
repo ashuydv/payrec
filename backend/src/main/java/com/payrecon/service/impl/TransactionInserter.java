@@ -39,7 +39,7 @@ class TransactionInserter {
                 .orElseThrow(() -> new ResourceNotFoundException("Merchant not found: " + request.merchantId()));
 
         Transaction transaction = new Transaction(
-                merchant, request.amount(), request.currency(), request.externalReference());
+                merchant, request.amount(), request.currency(), request.externalReference(), request.paymentType());
 
         try {
             return new InsertOutcome(transactionRepository.saveAndFlush(transaction), true);

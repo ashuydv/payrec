@@ -1,6 +1,7 @@
 package com.payrecon.service.impl;
 
 import com.payrecon.domain.Merchant;
+import com.payrecon.domain.PaymentType;
 import com.payrecon.domain.Transaction;
 import com.payrecon.dto.CreateTransactionRequest;
 import com.payrecon.exception.ResourceNotFoundException;
@@ -37,7 +38,7 @@ class TransactionInserterTest {
         inserter = new TransactionInserter(transactionRepository, merchantRepository);
         Merchant merchant = new Merchant("Acme", "ACC-1");
         setId(merchant, 1L);
-        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("20.00"), "USD", "ext-9");
+        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("20.00"), "USD", "ext-9", PaymentType.CARD);
 
         when(merchantRepository.findById(1L)).thenReturn(Optional.of(merchant));
         when(transactionRepository.saveAndFlush(any(Transaction.class)))
@@ -58,7 +59,7 @@ class TransactionInserterTest {
         inserter = new TransactionInserter(transactionRepository, merchantRepository);
         Merchant merchant = new Merchant("Acme", "ACC-1");
         setId(merchant, 1L);
-        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("20.00"), "USD", "ext-9");
+        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("20.00"), "USD", "ext-9", PaymentType.CARD);
         Transaction concurrentlyInserted = new Transaction(merchant, new BigDecimal("20.00"), "USD", "ext-9");
         setId(concurrentlyInserted, 55L);
 
@@ -76,7 +77,7 @@ class TransactionInserterTest {
     @Test
     void insertNewTransaction_throwsNotFound_whenMerchantMissing() {
         inserter = new TransactionInserter(transactionRepository, merchantRepository);
-        CreateTransactionRequest request = new CreateTransactionRequest(404L, new BigDecimal("20.00"), "USD", "ext-9");
+        CreateTransactionRequest request = new CreateTransactionRequest(404L, new BigDecimal("20.00"), "USD", "ext-9", PaymentType.CARD);
 
         when(merchantRepository.findById(404L)).thenReturn(Optional.empty());
 

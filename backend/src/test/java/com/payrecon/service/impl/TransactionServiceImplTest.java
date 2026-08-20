@@ -1,6 +1,7 @@
 package com.payrecon.service.impl;
 
 import com.payrecon.domain.Merchant;
+import com.payrecon.domain.PaymentType;
 import com.payrecon.domain.Transaction;
 import com.payrecon.domain.TransactionStatus;
 import com.payrecon.dto.CreateTransactionRequest;
@@ -47,7 +48,7 @@ class TransactionServiceImplTest {
 
     @Test
     void createTransaction_insertsNewRow_whenExternalReferenceUnseen() {
-        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("100.00"), "USD", "ext-123");
+        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("100.00"), "USD", "ext-123", PaymentType.CARD);
         Transaction saved = new Transaction(merchant, request.amount(), request.currency(), request.externalReference());
         setId(saved, 42L);
 
@@ -64,7 +65,7 @@ class TransactionServiceImplTest {
 
     @Test
     void createTransaction_returnsExistingRow_whenExternalReferenceAlreadyExists() {
-        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("100.00"), "USD", "ext-123");
+        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("100.00"), "USD", "ext-123", PaymentType.CARD);
         Transaction existing = new Transaction(merchant, new BigDecimal("100.00"), "USD", "ext-123");
         setId(existing, 7L);
 
@@ -81,7 +82,7 @@ class TransactionServiceImplTest {
     void createTransaction_returnsExistingRow_whenInserterLosesRaceToConcurrentRequest() {
         // Simulates: findByExternalReference sees nothing yet (not-created-yet window),
         // but by the time the insert runs, a concurrent request has already committed it.
-        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("50.00"), "USD", "ext-race");
+        CreateTransactionRequest request = new CreateTransactionRequest(1L, new BigDecimal("50.00"), "USD", "ext-race", PaymentType.CARD);
         Transaction winnerRow = new Transaction(merchant, new BigDecimal("50.00"), "USD", "ext-race");
         setId(winnerRow, 99L);
 

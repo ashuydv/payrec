@@ -1,5 +1,6 @@
 package com.payrecon.dto;
 
+import com.payrecon.domain.PaymentType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,13 @@ public record CreateTransactionRequest(
         String currency,
 
         @NotBlank(message = "externalReference is required")
-        String externalReference
+        String externalReference,
+
+        PaymentType paymentType
 ) {
+    public CreateTransactionRequest {
+        if (paymentType == null) {
+            paymentType = PaymentType.CARD;
+        }
+    }
 }
