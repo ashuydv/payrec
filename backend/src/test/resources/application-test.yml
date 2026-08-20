@@ -10,6 +10,10 @@ spring:
       ddl-auto: create-drop
     show-sql: false
 
+  sql:
+    init:
+      mode: never
+
   batch:
     job:
       enabled: false

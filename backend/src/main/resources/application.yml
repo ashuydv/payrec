@@ -17,6 +17,13 @@ spring:
         format_sql: true
         jdbc:
           time_zone: UTC
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/procedures.sql
+      separator: "//"
 
   batch:
     job:
