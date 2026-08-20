@@ -63,10 +63,24 @@ already been aggregated, which is what makes rerunning a period safe.
 
 See `docs/phase-4-settlement-batch.md`.
 
+## Phase 5 — Settlement resource API ✅
+
+Exposes `Settlement` over REST: `GET /api/settlements/{id}`,
+`GET /api/settlements?merchantId=&status=` (paged, filtered), and
+`PATCH /api/settlements/{id}/status` to transition `OPEN -> FINALIZED`
+(idempotent if already `FINALIZED`, rejected otherwise — mirrors Phase 1's
+transaction status transitions). Closes the loop Phase 4 opened: a
+settlement could be produced by the batch job but never viewed or closed
+out. The batch-trigger controller was renamed
+`SettlementController` → `SettlementRunController` (endpoint path
+unchanged) to free up the natural name for this resource controller.
+
+See `docs/phase-5-settlement-resource-api.md`.
+
 ## What's next (not yet planned in detail)
 
-The domain now supports the full transaction → reconciliation → settlement
-pipeline. Natural follow-ups, none started yet: exposing `Settlement` over
-REST (list/get, and a `FINALIZED` transition), scheduling settlement runs
-instead of triggering them by hand, and surfacing orphaned ledger entries
-(see `docs/phase-3-reconciliation-engine.md`'s "not in scope").
+The full transaction → reconciliation → settlement → finalize pipeline is
+now navigable end-to-end over REST. Natural follow-ups, none started yet:
+scheduling settlement runs instead of triggering them by hand, surfacing
+orphaned ledger entries (see `docs/phase-3-reconciliation-engine.md`'s "not
+in scope"), and a payout/export integration once a settlement is finalized.

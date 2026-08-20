@@ -1,56 +1,48 @@
 package com.payrecon.controller;
 
-import com.payrecon.batch.SettlementTasklet;
-import com.payrecon.dto.SettlementRunResult;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionException;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
+import com.payrecon.domain.SettlementStatus;
+import com.payrecon.dto.PageResponse;
+import com.payrecon.dto.SettlementResponse;
+import com.payrecon.dto.UpdateSettlementStatusRequest;
+import com.payrecon.service.SettlementService;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/settlement-runs")
+@RequestMapping("/api/settlements")
 public class SettlementController {
 
-    private final JobLauncher jobLauncher;
-    private final Job settlementJob;
+    private final SettlementService settlementService;
 
-    public SettlementController(JobLauncher jobLauncher, Job settlementJob) {
-        this.jobLauncher = jobLauncher;
-        this.settlementJob = settlementJob;
+    public SettlementController(SettlementService settlementService) {
+        this.settlementService = settlementService;
     }
 
-    /**
-     * Triggers a settlement run for {@code period} (an ISO local date, e.g.
-     * "2026-08-19") and blocks until it finishes. "startedAt" makes every
-     * launch a distinct JobInstance so the same period can be safely
-     * re-triggered (a rerun only picks up transactions that weren't settled
-     * — or weren't yet MATCHED — last time).
-     */
-    @PostMapping
-    public ResponseEntity<SettlementRunResult> trigger(@RequestParam String period) {
-        try {
-            JobExecution execution = jobLauncher.run(settlementJob, new JobParametersBuilder()
-                    .addString("period", period)
-                    .addLong("startedAt", System.currentTimeMillis())
-                    .toJobParameters());
+    @GetMapping("/{id}")
+    public ResponseEntity<SettlementResponse> getSettlement(@PathVariable Long id) {
+        return ResponseEntity.ok(settlementService.getSettlement(id));
+    }
 
-            if (execution.getStatus() != BatchStatus.COMPLETED) {
-                throw new IllegalStateException(
-                        "Settlement run for period %s did not complete: %s".formatted(period, execution.getExitStatus()));
-            }
+    @GetMapping
+    public ResponseEntity<PageResponse<SettlementResponse>> listSettlements(
+            @RequestParam(required = false) Long merchantId,
+            @RequestParam(required = false) SettlementStatus status,
+            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(settlementService.listSettlements(merchantId, status, pageable));
+    }
 
-            SettlementRunResult result =
-                    (SettlementRunResult) execution.getExecutionContext().get(SettlementTasklet.RESULT_KEY);
-            return ResponseEntity.ok(result);
-        } catch (JobExecutionException e) {
-            throw new IllegalStateException("Could not launch settlement run for period " + period, e);
-        }
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<SettlementResponse> updateStatus(
+            @PathVariable Long id, @Valid @RequestBody UpdateSettlementStatusRequest request) {
+        return ResponseEntity.ok(settlementService.updateStatus(id, request.status()));
     }
 }

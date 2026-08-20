@@ -1,6 +1,10 @@
 package com.payrecon.service;
 
+import com.payrecon.domain.SettlementStatus;
+import com.payrecon.dto.PageResponse;
+import com.payrecon.dto.SettlementResponse;
 import com.payrecon.dto.SettlementRunResult;
+import org.springframework.data.domain.Pageable;
 
 public interface SettlementService {
 
@@ -13,4 +17,11 @@ public interface SettlementService {
      * only picks up transactions that have since reconciled.
      */
     SettlementRunResult runSettlement(String period);
+
+    SettlementResponse getSettlement(Long id);
+
+    PageResponse<SettlementResponse> listSettlements(Long merchantId, SettlementStatus status, Pageable pageable);
+
+    /** Transitions a settlement to {@code newStatus}. Only OPEN -> FINALIZED is a real transition; FINALIZED -> FINALIZED is a no-op. */
+    SettlementResponse updateStatus(Long id, SettlementStatus newStatus);
 }

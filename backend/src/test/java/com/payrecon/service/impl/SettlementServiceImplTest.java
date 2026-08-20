@@ -1,9 +1,15 @@
 package com.payrecon.service.impl;
 
 import com.payrecon.domain.Merchant;
+import com.payrecon.domain.Settlement;
+import com.payrecon.domain.SettlementStatus;
 import com.payrecon.domain.Transaction;
 import com.payrecon.domain.TransactionStatus;
+import com.payrecon.dto.SettlementResponse;
 import com.payrecon.dto.SettlementRunResult;
+import com.payrecon.exception.InvalidStatusTransitionException;
+import com.payrecon.exception.ResourceNotFoundException;
+import com.payrecon.repository.SettlementRepository;
 import com.payrecon.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +23,10 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -32,18 +40,22 @@ class SettlementServiceImplTest {
     private TransactionRepository transactionRepository;
 
     @Mock
+    private SettlementRepository settlementRepository;
+
+    @Mock
     private SettlementMerchantRunner merchantRunner;
 
     private SettlementServiceImpl service;
 
+    private Merchant merchantOne;
     private Transaction merchantOneTx;
     private Transaction merchantTwoTx;
 
     @BeforeEach
     void setUp() {
-        service = new SettlementServiceImpl(transactionRepository, merchantRunner);
+        service = new SettlementServiceImpl(transactionRepository, settlementRepository, merchantRunner);
 
-        Merchant merchantOne = new Merchant("Acme Co", "ACC-001");
+        merchantOne = new Merchant("Acme Co", "ACC-001");
         setId(merchantOne, 1L);
         Merchant merchantTwo = new Merchant("Beta Co", "ACC-002");
         setId(merchantTwo, 2L);
@@ -53,8 +65,9 @@ class SettlementServiceImplTest {
         merchantTwoTx = new Transaction(merchantTwo, new BigDecimal("50.00"), "USD", "ext-2");
         setId(merchantTwoTx, 20L);
 
-        when(transactionRepository.findByStatusAndSettlementIsNullAndProcessedAtGreaterThanEqualAndProcessedAtLessThan(
-                eq(TransactionStatus.PROCESSED), any(), any()))
+        org.mockito.Mockito.lenient()
+                .when(transactionRepository.findByStatusAndSettlementIsNullAndProcessedAtGreaterThanEqualAndProcessedAtLessThan(
+                        eq(TransactionStatus.PROCESSED), any(), any()))
                 .thenReturn(List.of(merchantOneTx, merchantTwoTx));
     }
 
@@ -102,6 +115,61 @@ class SettlementServiceImplTest {
 
         assertThat(result.merchantsSkippedConflict()).isEqualTo(1);
         assertThat(result.merchantsSettled()).isEqualTo(1);
+    }
+
+    @Test
+    void getSettlement_throwsNotFound_whenMissing() {
+        when(settlementRepository.findById(404L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getSettlement(404L))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void getSettlement_returnsResponse_whenPresent() {
+        Settlement settlement = new Settlement(merchantOne, PERIOD, new BigDecimal("100.00"));
+        setId(settlement, 1L);
+        when(settlementRepository.findById(1L)).thenReturn(Optional.of(settlement));
+
+        SettlementResponse response = service.getSettlement(1L);
+
+        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.merchantId()).isEqualTo(1L);
+        assertThat(response.status()).isEqualTo(SettlementStatus.OPEN);
+    }
+
+    @Test
+    void updateStatus_allowsOpenToFinalized() {
+        Settlement settlement = new Settlement(merchantOne, PERIOD, new BigDecimal("100.00"));
+        setId(settlement, 1L);
+        when(settlementRepository.findById(1L)).thenReturn(Optional.of(settlement));
+
+        SettlementResponse response = service.updateStatus(1L, SettlementStatus.FINALIZED);
+
+        assertThat(response.status()).isEqualTo(SettlementStatus.FINALIZED);
+    }
+
+    @Test
+    void updateStatus_isIdempotent_whenAlreadyFinalized() {
+        Settlement settlement = new Settlement(merchantOne, PERIOD, new BigDecimal("100.00"));
+        settlement.setStatus(SettlementStatus.FINALIZED);
+        setId(settlement, 1L);
+        when(settlementRepository.findById(1L)).thenReturn(Optional.of(settlement));
+
+        SettlementResponse response = service.updateStatus(1L, SettlementStatus.FINALIZED);
+
+        assertThat(response.status()).isEqualTo(SettlementStatus.FINALIZED);
+    }
+
+    @Test
+    void updateStatus_rejectsFinalizedToOpen() {
+        Settlement settlement = new Settlement(merchantOne, PERIOD, new BigDecimal("100.00"));
+        settlement.setStatus(SettlementStatus.FINALIZED);
+        setId(settlement, 1L);
+        when(settlementRepository.findById(1L)).thenReturn(Optional.of(settlement));
+
+        assertThatThrownBy(() -> service.updateStatus(1L, SettlementStatus.OPEN))
+                .isInstanceOf(InvalidStatusTransitionException.class);
     }
 
     private static void setId(Object entity, Long id) {
