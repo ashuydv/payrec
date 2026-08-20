@@ -24,6 +24,12 @@ spring:
     jdbc:
       initialize-schema: always
 
+payrecon:
+  batch:
+    scheduling:
+      enabled: false
+      cron: "0 0 2 * * *"
+
 server:
   port: 8080
 

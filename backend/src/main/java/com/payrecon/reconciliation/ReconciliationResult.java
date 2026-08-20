@@ -1,5 +1,7 @@
 package com.payrecon.reconciliation;
 
+import com.payrecon.domain.ReconciliationOutcome;
+
 import java.math.BigDecimal;
 
 public record ReconciliationResult(

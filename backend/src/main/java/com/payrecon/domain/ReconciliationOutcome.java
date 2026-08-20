@@ -1,4 +1,4 @@
-package com.payrecon.reconciliation;
+package com.payrecon.domain;
 
 public enum ReconciliationOutcome {
     MATCHED,

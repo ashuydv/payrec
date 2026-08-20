@@ -4,7 +4,7 @@ import com.payrecon.domain.LedgerEntry;
 import com.payrecon.domain.LedgerSource;
 import com.payrecon.domain.Merchant;
 import com.payrecon.domain.Transaction;
-import com.payrecon.reconciliation.ReconciliationOutcome;
+import com.payrecon.domain.ReconciliationOutcome;
 import com.payrecon.reconciliation.ReconciliationResult;
 import com.payrecon.reconciliation.rule.ExactMatchRule;
 import org.junit.jupiter.api.Test;
