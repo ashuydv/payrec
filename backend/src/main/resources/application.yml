@@ -3,9 +3,9 @@ spring:
     name: payrecon-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5435/payrecon
-    username: payrecon
-    password: payrecon
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5435/payrecon}
+    username: ${SPRING_DATASOURCE_USERNAME:payrecon}
+    password: ${SPRING_DATASOURCE_PASSWORD:payrecon}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -36,6 +36,8 @@ payrecon:
     scheduling:
       enabled: false
       cron: "0 0 2 * * *"
+  cors:
+    allowed-origins: ${PAYRECON_CORS_ALLOWED_ORIGINS:http://localhost:4200}
 
 server:
   port: 8080

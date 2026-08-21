@@ -16,5 +16,40 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build:
+      context: ./backend
+    container_name: payrecon-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payrecon
+      SPRING_DATASOURCE_USERNAME: payrecon
+      SPRING_DATASOURCE_PASSWORD: payrecon
+      # The frontend container talks to the backend over the Docker network
+      # via nginx's reverse proxy (same-origin from the browser's point of
+      # view), so no browser ever calls this API cross-origin in this
+      # compose setup — CORS only matters for local `ng serve`.
+      PAYRECON_CORS_ALLOWED_ORIGINS: http://localhost:4200
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: payrecon-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "4200:80"
+
 volumes:
   payrecon-postgres-data:
